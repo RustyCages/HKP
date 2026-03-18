@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<meta name="robots" content="noindex, nofollow">
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<title>🎸 Hårdrockskören</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{background:#0a0a0a;color:#eee;font-family: sans-serif;padding:15px 12px 100px;}
+
+h1{font-size:24px; color:#e62e2e; text-align:center; margin-top:10px; text-transform:uppercase;}
+.sub{text-align:center; font-style:italic; font-size:12px; color:#888; margin-bottom:15px;}
+
+/* Hjälp-sektion */
+#help-section {
+    background: #1a1a1a; border: 1px solid #333; border-radius: 12px;
+    padding: 15px; margin-bottom: 15px; display: none; font-size: 14px; line-height: 1.5;
+}
+#help-section h3 { color: #e62e2e; margin-bottom: 8px; font-size: 16px; }
+.help-btn-toggle {
+    background: none; border: 1px solid #444; color: #A0A0A0; width: 100%;
+    padding: 8px; border-radius: 8px; font-size: 12px; margin-bottom: 15px; cursor: pointer;
+}
+
+#searchBar {
+    width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #333;
+    background: #1a1a1a; color: #fff; margin-bottom: 15px; font-size: 16px;
+}
+
+#ios-init {
+    background: #e62e2e; color: #fff; width: 100%; padding: 18px;
+    border-radius: 12px; font-weight: bold; border: none; margin-bottom: 15px;
+    display: block; font-size: 16px; cursor:pointer;
+}
+
+.player-sticky {
+    position: -webkit-sticky; position: sticky; top: 10px; z-index: 100;
+    background: #191919; border: 1px solid #444; border-radius: 14px;
+    padding: 12px; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+}
+.now-playing { font-size: 13px; font-weight: bold; color: #FF5532; text-align: center; margin-bottom: 10px; height: 1.2em; overflow: hidden; }
+
+/* Spelaren: Vita kontroller och vitt reglage */
+audio { width: 100%; height: 40px; margin-bottom: 10px; background-color: #333; border-radius: 8px; }
+audio::-webkit-media-controls-panel { background-color: #333; }
+audio::-webkit-media-controls-play-button { filter: invert(1); }
+audio::-webkit-media-controls-mute-button { filter: invert(1); }
+audio::-webkit-media-controls-timeline { filter: invert(1) brightness(2); }
+audio::-webkit-media-controls-current-time-display { color: #ffffff; }
+audio::-webkit-media-controls-time-remaining-display { color: #ffffff; }
+
+.nav-controls { display: flex; gap: 8px; }
+.nav-btn { background: #636363; color: #fff; border: none; padding: 12px; border-radius: 8px; flex: 1; font-weight: bold; }
+.nav-btn.primary { background: #FF5532; flex: 2; }
+
+.song-card { background:#1a1a1a; border:1px solid #333; border-radius:12px; margin-bottom:10px; overflow: hidden; }
+.song-header { display: flex; justify-content: space-between; align-items: center; padding: 15px; cursor: pointer; }
+.song-title { font-size:17px; font-weight:bold; color:#fff; }
+.song-artist { font-size:12px; color:#A0A0A0; font-style: italic; }
+
+.selection-badge { background: #FF5532; color: white; font-size: 10px; padding: 2px 6px; border-radius: 10px; margin-left: 8px; display: none; }
+.has-selection .selection-badge { display: inline-block; }
+
+.song-content { display: none; padding: 0 15px 15px 15px; border-top: 1px solid #222; }
+.song-card.expanded .song-content { display: block; }
+
+.track-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; padding: 8px 0; border-bottom: 1px solid #222; }
+.track-label { font-size: 13px; width: 70px; flex-shrink: 0; color: #D9D9D9;}
+.play-btn { flex-grow: 1; padding: 12px; border: none; border-radius: 8px; font-size: 12px; font-weight: bold; color: #fff; }
+
+/* Stämmor färgteman */
+.c-bass { background: #2e5cb8; }
+.c-tenor { background: #28a745; }
+.c-alto { background: #d97706; }
+.c-soprano { background: #be185d; }
+.c-choir { background: #FF5532; }
+.c-backing { background: #4b5532; }
+
+input[type="checkbox"] { width: 28px; height: 28px; accent-color: #FF5532; }
+
+/* Footer / Copyright */
+footer {
+    text-align: center; margin-top: 40px; padding: 20px;
+    border-top: 1px solid #222; color: #636363; font-size: 11px;
+}
+.warning { color: #444; margin-bottom: 10px; font-style: italic; }
+</style>
+</head>
+<body oncontextmenu="return false;">
+
+<h1>🎸 Hårdrockskören</h1>
+<p class="sub">Övningsportal</p>
+
+<button class="help-btn-toggle" onclick="toggleHelp()">Visa instruktioner för iPhone/Android</button>
+
+<div id="help-section">
+    <h3>📱 Spara som App</h3>
+    <p>iPhone: Tryck på Dela-knappen -> "Lägg till på hemskärmen".<br>
+    Android: Tryck på tre punkterna -> "Lägg till på startskärmen".</p>
+    <button class="help-btn-toggle" onclick="toggleHelp()" style="margin-top:10px;">Stäng</button>
+</div>
+
+<button id="ios-init" onclick="initAudio()">STARTA SPELAREN</button>
+
+<div class="player-sticky">
+    <div class="now-playing" id="trackTitle">Välj låtar nedan</div>
+    <audio id="audioPlayer" playsinline controls controlsList="nodownload"></audio>
+    <div class="nav-controls">
+        <button class="nav-btn" onclick="prevTrack()">⏮</button>
+        <button class="nav-btn primary" onclick="startPlaylist()">SPELA VALDA</button>
+        <button class="nav-btn" onclick="nextTrack()">⏭</button>
+    </div>
+</div>
+
+<input type="text" id="searchBar" placeholder="Sök låt..." onkeyup="render()">
+
+<div id="songList"></div>
+
+<footer>
+    <p class="warning">Allt material är upphovsrättsskyddat. Otillåten spridning eller nedladdning loggas via nätverksprotokoll.</p>
+</footer>
+
+<script>
+/* Samma JavaScript som tidigare för att hantera låtar, kö och render */
+const S3 = "https://hrk-media-prod-263167772559.s3.eu-north-1.amazonaws.com/materials";
+const audioPlayer = document.getElementById('audioPlayer');
+const trackTitle = document.getElementById('trackTitle');
+
+function toggleHelp() {
+    const hs = document.getElementById('help-section');
+    hs.style.display = hs.style.display === 'block' ? 'none' : 'block';
+}
+
+function initAudio() {
+    audioPlayer.src = "https://actions.google.com/sounds/v1/alarms/beep_short.ogg";
+    audioPlayer.play().then(() => {
+        audioPlayer.pause();
+        document.getElementById('ios-init').style.display = 'none';
+        trackTitle.innerText = "Ljud redo!";
+    });
+}
+
+let songs = [
+  { title:"Ace of Spades", artist:"Motörhead", id:"ace", tracks:[
+    {label:"Bas", cls:"c-bass", url:`${S3}/598c0d6a-bc95-4e2a-b2ee-098429b39a12-BAS.mp3`},
+    {label:"Tenor", cls:"c-tenor", url:`${S3}/1de62d84-5f08-4deb-aa93-73e0ac38d1ef-TENOR.mp3`},
+    {label:"Alt", cls:"c-alto", url:`${S3}/7d00f92d-4f01-462e-8daa-7413a99a56a0-ALT.mp3`},
+    {label:"Sopran", cls:"c-soprano", url:`${S3}/c2007ea4-3fb6-4ee6-ad19-f0a41cb39172-SOPRAN.mp3`},
+    {label:"Backtrack", cls:"c-backing", url:`${S3}/7492837c-0829-4121-b7ee-cdfa1bce3eb3-BACKING%20TRACK.mp3`},
+    {label:"Kör", cls:"c-choir", url:`${S3}/eb1a082e-e05f-4166-85f9-82a684fbed0c-KO%CC%88R.mp3`}
+  ]},
+  { title:"Sweet Child O' Mine", artist:"Guns N' Roses", id:"sweet", tracks:[
+    {label:"Bas", cls:"c-bass", url:`${S3}/d9cc778c-a360-413b-8568-b3427a8a5de2-BAS.mp3`},
+    {label:"Tenor", cls:"c-tenor", url:`${S3}/05be03bd-6bc9-487e-85da-ac09657e33a7-TENOR.mp3`},
+    {label:"Alt", cls:"c-alto", url:`${S3}/e7c5d2ee-a0f8-44b0-8958-5813f3111c33-ALT.mp3`},
+    {label:"Sopran", cls:"c-soprano", url:`${S3}/a73b9e97-42fb-4665-9bc0-ac624813b21a-SOPRAN.mp3`},
+    {label:"Backtrack", cls:"c-backing", url:`${S3}/475dd3fc-ca92-402e-ab9f-09c5d52f97e4-BACKTRACK.mp3`},
+    {label:"Kör", cls:"c-choir", url:`${S3}/faee1177-5cc3-4513-839a-eacc8896eee2-KO%CC%88R.mp3`}
+  ]},
+  { title:"Aces High", artist:"Iron Maiden", id:"aces", tracks:[
+    {label:"Bas", cls:"c-bass", url:`${S3}/dd523749-e565-4570-975d-1ebb282118d8-BAS.mp3`},
+    {label:"Tenor", cls:"c-tenor", url:`${S3}/82515801-f083-4cc4-9aad-63d80b3356cd-TENOR.mp3`},
+    {label:"Alt", cls:"c-alto", url:`${S3}/4b52d54e-5468-4418-9226-306af3decfbc-ALT.mp3`},
+    {label:"Sopran", cls:"c-soprano", url:`${S3}/ee3b5a33-26d4-4cbd-af1a-dc56ced10c2b-SOPRAN.mp3`},
+    {label:"Backtrack", cls:"c-backing", url:`${S3}/e88f63ca-b82d-42f9-8372-f2f208f8f4c9-BACKINGTRACK.mp3`},
+    {label:"Kör", cls:"c-choir", url:`${S3}/efa63d1c-4d04-4960-b959-4ee1197b2899-KO%CC%88R.mp3`}
+  ]},
+  { title:"Enter Sandman", artist:"Metallica", id:"sandman", tracks:[
+    {label:"Bas", cls:"c-bass", url:`${S3}/f452ada2-e866-4a0e-955b-5cba2b7febd7-BAS.mp3`},
+    {label:"Tenor", cls:"c-tenor", url:`${S3}/91cf22a4-cc2e-428c-bc0f-ff14fe944fdb-TENOR.mp3`},
+    {label:"Alt", cls:"c-alto", url:`${S3}/22c51d6b-a40c-40e4-9f8c-d1113e5f6eac-ALT.mp3`},
+    {label:"Sopran", cls:"c-soprano", url:`${S3}/f9c1ba22-a00f-4be3-86e1-ad46048e6b33-SOPRAN.mp3`},
+    {label:"Backtrack", cls:"c-backing", url:`${S3}/96cf1d32-abba-42c9-8b1e-2a7289e0a1c4-BACKTRACK.mp3`},
+    {label:"Kör", cls:"c-choir", url:`${S3}/951cd291-ae45-4b52-bf08-a1d61e38d277-KO%CC%88R.mp3`}
+  ]},
+  { title:"Wasted Years", artist:"Iron Maiden", id:"wasted", tracks:[
+    {label:"Bas", cls:"c-bass", url:`${S3}/24747472-c8cf-410c-8717-bdee72736fca-BAS.mp3`},
+    {label:"Tenor", cls:"c-tenor", url:`${S3}/6a7e2d95-eed9-49fa-aff8-68c3ea8a7975-TENOR%20.mp3`},
+    {label:"Alt", cls:"c-alto", url:`${S3}/f184bc0a-964b-4b27-aae2-0e735e340a4b-ALT.mp3`},
+    {label:"Sopran", cls:"c-soprano", url:`${S3}/1b704128-7b27-4fe3-9a8e-bb19f88fd867-SOPRAN.mp3`},
+    {label:"Backtrack", cls:"c-backing", url:`${S3}/3b79e861-af0e-459e-ba1b-388e463a0805-%20BACKTRACK.mp3`},
+    {label:"Kör", cls:"c-choir", url:`${S3}/2ddc7be6-3789-4f33-8df1-fb39c3624c0a-KO%CC%88R.mp3`}
+  ]},
+  { title:"The Pretender", artist:"Foo Fighters", id:"pretender", tracks:[
+    {label:"Bas", cls:"c-bass", url:`${S3}/87f12304-60a8-437b-9989-f033d58b7360-BAS.mp3`},
+    {label:"Tenor", cls:"c-tenor", url:`${S3}/e8eba094-e79c-4dae-b91e-bab83914f875-TENOR1.mp3`},
+    {label:"Alt", cls:"c-alto", url:`${S3}/e0994e97-5bae-4651-a338-10b51f0ed0fd-%20ALT1.mp3`},
+    {label:"Sopran", cls:"c-soprano", url:`${S3}/c9f6fe5f-f73e-4381-bf8c-cccf48aae800-SOP1.mp3`},
+    {label:"Backtrack", cls:"c-backing", url:`${S3}/fd9a9080-caef-402a-9c68-77a1d34ee634-BACKTRACK.mp3`},
+    {label:"Kör", cls:"c-choir", url:`${S3}/830e12cf-aa42-4b87-8d79-0f70b6ba54ee-NY%20KO%CC%88R.mp3`}
+  ]},
+  { title:"He Is", artist:"Ghost", id:"heis", tracks:[
+    {label:"Bas", cls:"c-bass", url:`${S3}/a7f5f322-f881-4e1a-9af3-100823090ceb-BAS%20.mp3`},
+    {label:"Tenor", cls:"c-tenor", url:`${S3}/39b35140-f2ae-414f-96b3-ff916a4fefcf-TENOR.mp3`},
+    {label:"Alt", cls:"c-alto", url:`${S3}/ed5a1d16-d43a-4d79-ba53-5c910d5b107b-ALT.mp3`},
+    {label:"Sopran", cls:"c-soprano", url:`${S3}/42e6a032-268b-4dad-a0c3-9ddd377e51c8-SOPRAN.mp3`},
+    {label:"Kör", cls:"c-choir", url:`${S3}/bba3dbd5-afc1-4962-b38b-3f4df975a10f-KO%CC%88R.mp3`}
+  ]},
+  { title:"Breaking the Law", artist:"Judas Priest", id:"law", tracks:[
+    {label:"Bas", cls:"c-bass", url:`${S3}/314cbd93-2aa4-49d1-aa57-5ffb5562f089-BAS.mp3`},
+    {label:"Tenor", cls:"c-tenor", url:`${S3}/9e2b2ec0-5d67-4574-a30c-2ed18183d92c-TENOR.mp3`},
+    {label:"Alt", cls:"c-alto", url:`${S3}/5c4e185f-2a06-478a-ab4f-3fe1e23cdd8b-ALT.mp3`},
+    {label:"Sopran", cls:"c-soprano", url:`${S3}/c7f139e0-aa1c-48f1-9031-8ded6bd9b93e-SOPRAN.mp3`},
+    {label:"Backtrack", cls:"c-backing", url:`${S3}/ba4e3651-944a-4eba-a624-ecc1a522a260-BACKTRACK.mp3`},
+    {label:"Kör", cls:"c-choir", url:`${S3}/1baf6a97-a188-439d-b630-d0c8e59be58f-KO%CC%88R.mp3`}
+  ]},
+  { title:"For Whom the Bell Tolls", artist:"Metallica", id:"tolls", tracks:[
+    {label:"Bas", cls:"c-bass", url:`${S3}/050b4292-53d0-4cc9-954b-f029e871ef5b-BAS.mp3`},
+    {label:"Tenor", cls:"c-tenor", url:`${S3}/769f74b8-8702-43f1-ba62-44567776dffd-TENOR.mp3`},
+    {label:"Alt", cls:"c-alto", url:`${S3}/f8ef3ac1-6728-440f-b1dd-29d60e44f00b-ALT.mp3`},
+    {label:"Sopran", cls:"c-soprano", url:`${S3}/144c9205-a902-41ae-932c-feb419523fb8-SOPRAN.mp3`},
+    {label:"Backtrack", cls:"c-backing", url:`${S3}/029bbe66-ece6-4605-819b-5be59f1ccb3c-BACKTRACK.mp3`},
+    {label:"Kör", cls:"c-choir", url:`${S3}/1ca4e372-cfad-452b-ba4f-f96c2e6516cb-KO%CC%88R.mp3`}
+  ]}
+];
+
+songs.sort((a, b) => a.title.localeCompare(b.title));
+let playQueue = [];
+let currentIndex = 0;
+
+function toggleSong(cardId) { document.getElementById(cardId).classList.toggle('expanded'); }
+function updateBadge(songId) {
+    const card = document.getElementById(`card-${songId}`);
+    const checked = card.querySelectorAll('input[type="checkbox"]:checked').length;
+    if (checked > 0) {
+        card.classList.add('has-selection');
+        card.querySelector('.selection-badge').innerText = `${checked} VALDA`;
+    } else {
+        card.classList.remove('has-selection');
+    }
+}
+function playTrack(idx) {
+    if(!playQueue[idx]) return;
+    currentIndex = idx;
+    const t = playQueue[currentIndex];
+    trackTitle.innerText = `[${currentIndex+1}/${playQueue.length}] ${t.name}`;
+    audioPlayer.src = encodeURI(t.url).replace(/'/g, "%27");
+    audioPlayer.load();
+    audioPlayer.play();
+}
+function startPlaylist() {
+    playQueue = [];
+    songs.forEach(s => {
+        s.tracks.forEach((t, i) => {
+            if(document.getElementById(`cb-${s.id}-${i}`)?.checked) {
+                playQueue.push({ url: t.url, name: `${s.title} (${t.label})` });
+            }
+        });
+    });
+    if(playQueue.length > 0) playTrack(0);
+}
+function playSingle(e, sIdx, tIdx) {
+    e.stopPropagation();
+    const s = songs[sIdx];
+    const t = s.tracks[tIdx];
+    playQueue = [{ url: t.url, name: `${s.title} (${t.label})` }];
+    playTrack(0);
+}
+function nextTrack() { if(currentIndex < playQueue.length - 1) playTrack(currentIndex + 1); }
+function prevTrack() { if(currentIndex > 0) playTrack(currentIndex - 1); }
+audioPlayer.onended = nextTrack;
+function render() {
+    const term = document.getElementById('searchBar').value.toLowerCase();
+    let html = "";
+    songs.forEach((s, sIdx) => {
+        if(!s.title.toLowerCase().includes(term) && !s.artist.toLowerCase().includes(term)) return;
+        html += `
+        <div class="song-card" id="card-${s.id}">
+            <div class="song-header" onclick="toggleSong('card-${s.id}')">
+                <div>
+                    <div class="song-title">${s.title} <span class="selection-badge"></span></div>
+                    <div class="song-artist">${s.artist}</div>
+                </div>
+            </div>
+            <div class="song-content">`;
+        s.tracks.forEach((t, tIdx) => {
+            html += `
+                <div class="track-row">
+                    <input type="checkbox" id="cb-${s.id}-${tIdx}" onchange="updateBadge('${s.id}')">
+                    <span class="track-label">${t.label}</span>
+                    <button class="play-btn ${t.cls}" onclick="playSingle(event, ${sIdx}, ${tIdx})">LYSSNA</button>
+                </div>`;
+        });
+        html += `</div></div>`;
+    });
+    document.getElementById('songList').innerHTML = html;
+}
+render();
+</script>
+</body>
+</html>
