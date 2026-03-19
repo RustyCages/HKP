@@ -136,7 +136,7 @@ function initAudio() {
         audioPlayer.pause();
         document.getElementById('ios-init').style.display = 'none';
         trackTitle.innerText = "Ljud redo!";
-    });
+    }).catch(e => console.log("Init misslyckades:", e));
 }
 
 function playTrack(idx) {
@@ -146,10 +146,9 @@ function playTrack(idx) {
     trackTitle.innerText = `[${currentIndex + 1}/${playQueue.length}] ${t.name}`;
     audioPlayer.src = encodeURI(t.url);
     audioPlayer.load();
-    audioPlayer.play().catch(e => console.log("Auto-play väntar..."));
+    audioPlayer.play().catch(e => console.log("Väntar på användarinteraktion..."));
 }
 
-// Lyssnare för att byta låt automatiskt
 audioPlayer.addEventListener('ended', function() {
     if (currentIndex < playQueue.length - 1) {
         nextTrack();
@@ -172,13 +171,16 @@ function startPlaylist() {
         });
     });
     if (playQueue.length > 0) playTrack(0);
+    else alert("Välj minst en stämma först!");
 }
 
-function playSingle(e, sIdx, tIdx) {
+// FIXAD FUNKTION: Hittar nu rätt låt via ID istället för index
+function playSingle(e, songId, trackIdx) {
     e.stopPropagation();
-    const s = songs[sIdx];
-    const t = s.tracks[tIdx];
-    playQueue = [{ url: t.url, name: `${s.title} (${t.label})` }];
+    const song = songs.find(s => s.id === songId);
+    if (!song) return;
+    const track = song.tracks[trackIdx];
+    playQueue = [{ url: track.url, name: `${song.title} (${track.label})` }];
     playTrack(0);
 }
 
@@ -187,7 +189,10 @@ function toggleHelp() {
     hs.style.display = hs.style.display === 'block' ? 'none' : 'block';
 }
 
-function toggleSong(cardId) { document.getElementById(cardId).classList.toggle('expanded'); }
+function toggleSong(cardId) {
+    const card = document.getElementById(cardId);
+    if (card) card.classList.toggle('expanded');
+}
 
 function updateBadge(songId) {
     const card = document.getElementById(`card-${songId}`);
@@ -279,7 +284,7 @@ songs.sort((a, b) => a.title.localeCompare(b.title));
 function render() {
     const term = document.getElementById('searchBar').value.toLowerCase();
     let html = "";
-    songs.forEach((s, sIdx) => {
+    songs.forEach((s) => {
         if(!s.title.toLowerCase().includes(term) && !s.artist.toLowerCase().includes(term)) return;
         html += `
         <div class="song-card" id="card-${s.id}">
@@ -295,7 +300,7 @@ function render() {
                 <div class="track-row">
                     <input type="checkbox" id="cb-${s.id}-${tIdx}" onchange="updateBadge('${s.id}')">
                     <span class="track-label">${t.label}</span>
-                    <button class="play-btn ${t.cls}" onclick="playSingle(event, ${sIdx}, ${tIdx})">LYSSNA</button>
+                    <button class="play-btn ${t.cls}" onclick="playSingle(event, '${s.id}', ${tIdx})">LYSSNA</button>
                 </div>`;
         });
         html += `</div></div>`;
