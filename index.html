@@ -141,12 +141,23 @@ function initAudio() {
 
 function playTrack(idx) {
     if (idx < 0 || idx >= playQueue.length) return;
+    
     currentIndex = idx;
     const t = playQueue[currentIndex];
     trackTitle.innerText = `[${currentIndex + 1}/${playQueue.length}] ${t.name}`;
-    audioPlayer.src = encodeURI(t.url);
+    
+    // Vi använder absolut rå-URL för att inte förstöra "KO%CC%88R"-kodningen
+    audioPlayer.src = t.url;
+    
     audioPlayer.load();
-    audioPlayer.play().catch(e => console.log("Väntar på användarinteraktion..."));
+    
+    const playPromise = audioPlayer.play();
+    if (playPromise !== undefined) {
+        playPromise.catch(error => {
+            console.log("Autoplay blockat eller filfel:", error);
+            trackTitle.innerText = "Tryck PLAY manuellt";
+        });
+    }
 }
 
 audioPlayer.addEventListener('ended', function() {
