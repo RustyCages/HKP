@@ -42,7 +42,7 @@ h1{font-size:24px; color:#e62e2e; text-align:center; margin-top:10px; text-trans
 }
 .now-playing { font-size: 13px; font-weight: bold; color: #FF5532; text-align: center; margin-bottom: 10px; height: 1.2em; overflow: hidden; }
 
-/* Spelaren: Vita kontroller och vitt reglage */
+/* Spelaren: Vita kontroller */
 audio { width: 100%; height: 40px; margin-bottom: 10px; background-color: #333; border-radius: 8px; }
 audio::-webkit-media-controls-panel { background-color: #333; }
 audio::-webkit-media-controls-play-button { filter: invert(1); }
@@ -80,7 +80,6 @@ audio::-webkit-media-controls-time-remaining-display { color: #ffffff; }
 
 input[type="checkbox"] { width: 28px; height: 28px; accent-color: #FF5532; }
 
-/* Footer / Copyright */
 footer {
     text-align: center; margin-top: 40px; padding: 20px;
     border-top: 1px solid #222; color: #636363; font-size: 11px;
@@ -119,19 +118,17 @@ footer {
 <div id="songList"></div>
 
 <footer>
-    <p class="warning">Allt material är upphovsrättsskyddat. Otillåten spridning eller nedladdning loggas via nätverksprotokoll.</p>
+    <p class="warning">Allt material är upphovsrättsskyddat. Otillåten spridning loggas via nätverksprotokoll.</p>
+    <p>&copy; 2026 Skapad av Niklas Friberg</p>
 </footer>
 
 <script>
-/* Samma JavaScript som tidigare för att hantera låtar, kö och render */
 const S3 = "https://hrk-media-prod-263167772559.s3.eu-north-1.amazonaws.com/materials";
 const audioPlayer = document.getElementById('audioPlayer');
 const trackTitle = document.getElementById('trackTitle');
 
-function toggleHelp() {
-    const hs = document.getElementById('help-section');
-    hs.style.display = hs.style.display === 'block' ? 'none' : 'block';
-}
+let playQueue = [];
+let currentIndex = 0;
 
 function initAudio() {
     audioPlayer.src = "https://actions.google.com/sounds/v1/alarms/beep_short.ogg";
@@ -140,6 +137,67 @@ function initAudio() {
         document.getElementById('ios-init').style.display = 'none';
         trackTitle.innerText = "Ljud redo!";
     });
+}
+
+function playTrack(idx) {
+    if (idx < 0 || idx >= playQueue.length) return;
+    currentIndex = idx;
+    const t = playQueue[currentIndex];
+    trackTitle.innerText = `[${currentIndex + 1}/${playQueue.length}] ${t.name}`;
+    audioPlayer.src = encodeURI(t.url);
+    audioPlayer.load();
+    audioPlayer.play().catch(e => console.log("Auto-play väntar..."));
+}
+
+// Lyssnare för att byta låt automatiskt
+audioPlayer.addEventListener('ended', function() {
+    if (currentIndex < playQueue.length - 1) {
+        nextTrack();
+    } else {
+        trackTitle.innerText = "Spellistan klar!";
+    }
+});
+
+function nextTrack() { if (currentIndex < playQueue.length - 1) playTrack(currentIndex + 1); }
+function prevTrack() { if (currentIndex > 0) playTrack(currentIndex - 1); }
+
+function startPlaylist() {
+    playQueue = [];
+    songs.forEach(s => {
+        s.tracks.forEach((t, i) => {
+            const cb = document.getElementById(`cb-${s.id}-${i}`);
+            if (cb && cb.checked) {
+                playQueue.push({ url: t.url, name: `${s.title} (${t.label})` });
+            }
+        });
+    });
+    if (playQueue.length > 0) playTrack(0);
+}
+
+function playSingle(e, sIdx, tIdx) {
+    e.stopPropagation();
+    const s = songs[sIdx];
+    const t = s.tracks[tIdx];
+    playQueue = [{ url: t.url, name: `${s.title} (${t.label})` }];
+    playTrack(0);
+}
+
+function toggleHelp() {
+    const hs = document.getElementById('help-section');
+    hs.style.display = hs.style.display === 'block' ? 'none' : 'block';
+}
+
+function toggleSong(cardId) { document.getElementById(cardId).classList.toggle('expanded'); }
+
+function updateBadge(songId) {
+    const card = document.getElementById(`card-${songId}`);
+    const checked = card.querySelectorAll('input[type="checkbox"]:checked').length;
+    if (checked > 0) {
+        card.classList.add('has-selection');
+        card.querySelector('.selection-badge').innerText = `${checked} VALDA`;
+    } else {
+        card.classList.remove('has-selection');
+    }
 }
 
 let songs = [
@@ -217,50 +275,7 @@ let songs = [
 ];
 
 songs.sort((a, b) => a.title.localeCompare(b.title));
-let playQueue = [];
-let currentIndex = 0;
 
-function toggleSong(cardId) { document.getElementById(cardId).classList.toggle('expanded'); }
-function updateBadge(songId) {
-    const card = document.getElementById(`card-${songId}`);
-    const checked = card.querySelectorAll('input[type="checkbox"]:checked').length;
-    if (checked > 0) {
-        card.classList.add('has-selection');
-        card.querySelector('.selection-badge').innerText = `${checked} VALDA`;
-    } else {
-        card.classList.remove('has-selection');
-    }
-}
-function playTrack(idx) {
-    if(!playQueue[idx]) return;
-    currentIndex = idx;
-    const t = playQueue[currentIndex];
-    trackTitle.innerText = `[${currentIndex+1}/${playQueue.length}] ${t.name}`;
-    audioPlayer.src = encodeURI(t.url).replace(/'/g, "%27");
-    audioPlayer.load();
-    audioPlayer.play();
-}
-function startPlaylist() {
-    playQueue = [];
-    songs.forEach(s => {
-        s.tracks.forEach((t, i) => {
-            if(document.getElementById(`cb-${s.id}-${i}`)?.checked) {
-                playQueue.push({ url: t.url, name: `${s.title} (${t.label})` });
-            }
-        });
-    });
-    if(playQueue.length > 0) playTrack(0);
-}
-function playSingle(e, sIdx, tIdx) {
-    e.stopPropagation();
-    const s = songs[sIdx];
-    const t = s.tracks[tIdx];
-    playQueue = [{ url: t.url, name: `${s.title} (${t.label})` }];
-    playTrack(0);
-}
-function nextTrack() { if(currentIndex < playQueue.length - 1) playTrack(currentIndex + 1); }
-function prevTrack() { if(currentIndex > 0) playTrack(currentIndex - 1); }
-audioPlayer.onended = nextTrack;
 function render() {
     const term = document.getElementById('searchBar').value.toLowerCase();
     let html = "";
