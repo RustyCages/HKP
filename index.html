@@ -139,49 +139,24 @@ function initAudio() {
     }).catch(e => console.log("Init misslyckades:", e));
 }
 
-// Fetch via blob för att kringgå webbläsarens URL-normalisering (NFD → NFC)
-// som annars förstör filnamn som "KO%CC%88R" → "K%C3%96R" och ger 404
-async function fetchAudioBlob(url) {
-    const response = await fetch(url);
-    if (!response.ok) throw new Error(`HTTP ${response.status} för: ${url}`);
-    const blob = await response.blob();
-    return URL.createObjectURL(blob);
-}
-
-// Håll koll på föregående blob-URL så vi kan frigöra minnet
-let currentBlobUrl = null;
-
-async function playTrack(idx) {
+function playTrack(idx) {
     if (idx < 0 || idx >= playQueue.length) return;
     
     currentIndex = idx;
     const t = playQueue[currentIndex];
     trackTitle.innerText = `[${currentIndex + 1}/${playQueue.length}] ${t.name}`;
-
-    try {
-        // Frigör föregående blob om den finns
-        if (currentBlobUrl) {
-            URL.revokeObjectURL(currentBlobUrl);
-            currentBlobUrl = null;
-        }
-
-        trackTitle.innerText = `⏳ Laddar… ${t.name}`;
-        currentBlobUrl = await fetchAudioBlob(t.url);
-        trackTitle.innerText = `[${currentIndex + 1}/${playQueue.length}] ${t.name}`;
-
-        audioPlayer.src = currentBlobUrl;
-        audioPlayer.load();
-
-        const playPromise = audioPlayer.play();
-        if (playPromise !== undefined) {
-            playPromise.catch(error => {
-                console.log("Autoplay blockat eller filfel:", error);
-                trackTitle.innerText = "Tryck PLAY manuellt";
-            });
-        }
-    } catch (err) {
-        console.error("Kunde inte ladda spår:", err);
-        trackTitle.innerText = `❌ Fel vid laddning: ${t.name}`;
+    
+    // Vi använder absolut rå-URL för att inte förstöra "KO%CC%88R"-kodningen
+    audioPlayer.src = t.url;
+    
+    audioPlayer.load();
+    
+    const playPromise = audioPlayer.play();
+    if (playPromise !== undefined) {
+        playPromise.catch(error => {
+            console.log("Autoplay blockat eller filfel:", error);
+            trackTitle.innerText = "Tryck PLAY manuellt";
+        });
     }
 }
 
