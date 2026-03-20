@@ -84,6 +84,8 @@ audio { width: 100%; height: 44px; margin-bottom: 10px; }
 .c-backing { background: #636363; }
 
 input[type="checkbox"] { width: 24px; height: 24px; accent-color: #FF5532; }
+
+
 </style>
 </head>
 <body>
@@ -98,7 +100,7 @@ input[type="checkbox"] { width: 24px; height: 24px; accent-color: #FF5532; }
   <p>Tryck på <strong>1. AKTIVERA LJUD HÄR</strong> första gången du öppnar appen — det krävs för att ljud ska fungera på iPhone och Android.</p>
 
   <h3>🎵 Välj stämmor &amp; spela lista</h3>
-  <p>Expandera en låt och bocka i en eller flera stämmor. Tryck sedan <strong>⚡ SPELA VALDA</strong> för att spela dem i följd. Vill du testa en stämma direkt — tryck på knappen med stämmans namn.</p>
+  <p>Expandera en låt och bocka i stämmor i den ordning du vill höra dem. Siffran på kortet visar hur många du valt. Tryck sedan <strong>⚡ SPELA VALDA</strong> — spellistan följer exakt den ordning du bockade i.</p>
 
   <h3>🔁 Repeat</h3>
   <p>Tryck på 🔁-knappen bredvid navigeringen för att växla repeat-läge:<br>
@@ -273,19 +275,18 @@ async function playTrack(idx) {
 }
 
 function startPlaylist() {
-    playQueue = [];
-    songs.forEach(s => {
-        s.tracks.forEach((t, i) => {
-            if (document.getElementById(`cb-${s.id}-${i}`).checked) {
-                playQueue.push({ url: t.url, name: `${s.title} (${t.label})` });
-            }
-        });
+    if (checkOrder.length === 0) { alert('Bocka i minst en stämma först!'); return; }
+    playQueue = checkOrder.map(({ songId, trackIdx }) => {
+        const s = songs.find(s => s.id === songId);
+        const t = s.tracks[trackIdx];
+        return { url: t.url, name: `${s.title} (${t.label})` };
     });
-    if (playQueue.length > 0) playTrack(0);
+    playTrack(0);
 }
 
-function playSingle(songIdx, trackIdx) {
-    const s = songs[songIdx];
+function playSingle(songId, trackIdx) {
+    const s = songs.find(s => s.id === songId);
+    if (!s) return;
     const t = s.tracks[trackIdx];
     playQueue = [{ url: t.url, name: `${s.title} (${t.label})` }];
     playTrack(0);
@@ -306,6 +307,161 @@ audioPlayer.onended = function() {
     }
 };
 
+
+// ── SORTING ──────────────────────────────────────────────
+let sortMode = 'custom'; // 'az', 'za', 'custom'
+
+function sortSongs(mode) {
+    sortMode = mode;
+    document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+    const btn = document.getElementById('sort-' + mode);
+    if (btn) btn.classList.add('active');
+    if (mode === 'az') songs.sort((a, b) => a.title.localeCompare(b.title, 'sv'));
+    else if (mode === 'za') songs.sort((a, b) => b.title.localeCompare(a.title, 'sv'));
+    render();
+    initDragDrop();
+}
+
+function moveSong(id, dir) {
+    const idx = songs.findIndex(s => s.id === id);
+    const newIdx = idx + dir;
+    if (newIdx < 0 || newIdx >= songs.length) return;
+    [songs[idx], songs[newIdx]] = [songs[newIdx], songs[idx]];
+    sortMode = 'custom';
+    document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+    render();
+    initDragDrop();
+}
+
+// ── DRAG AND DROP (mouse + touch) ────────────────────────
+function initDragDrop() {
+    const list = document.getElementById('songList');
+    let dragged = null;
+    let touchClone = null;
+    let touchOffX = 0, touchOffY = 0;
+
+    list.querySelectorAll('.drag-handle').forEach(handle => {
+        const card = handle.closest('.song-card');
+
+        // Mouse drag
+        handle.addEventListener('mousedown', e => {
+            dragged = card;
+            card.classList.add('dragging');
+        });
+
+        // Touch drag
+        handle.addEventListener('touchstart', e => {
+            dragged = card;
+            card.classList.add('dragging');
+            const touch = e.touches[0];
+            const rect = card.getBoundingClientRect();
+            touchOffX = touch.clientX - rect.left;
+            touchOffY = touch.clientY - rect.top;
+
+            touchClone = card.cloneNode(true);
+            touchClone.style.cssText = `position:fixed;z-index:9999;width:${rect.width}px;opacity:0.85;pointer-events:none;left:${rect.left}px;top:${rect.top}px;`;
+            document.body.appendChild(touchClone);
+            e.preventDefault();
+        }, { passive: false });
+    });
+
+    list.querySelectorAll('.song-card').forEach(card => {
+        card.addEventListener('dragover', e => {
+            e.preventDefault();
+            if (dragged && dragged !== card) {
+                card.classList.add('drag-over');
+            }
+        });
+        card.addEventListener('dragleave', () => card.classList.remove('drag-over'));
+        card.addEventListener('drop', e => {
+            e.preventDefault();
+            card.classList.remove('drag-over');
+            if (dragged && dragged !== card) dropCard(card);
+        });
+    });
+
+    document.addEventListener('mousemove', e => {
+        if (!dragged) return;
+        const el = document.elementFromPoint(e.clientX, e.clientY);
+        const target = el && el.closest('.song-card');
+        list.querySelectorAll('.song-card').forEach(c => c.classList.remove('drag-over'));
+        if (target && target !== dragged) target.classList.add('drag-over');
+    });
+
+    document.addEventListener('mouseup', e => {
+        if (!dragged) return;
+        const el = document.elementFromPoint(e.clientX, e.clientY);
+        const target = el && el.closest('.song-card');
+        list.querySelectorAll('.song-card').forEach(c => c.classList.remove('drag-over'));
+        if (target && target !== dragged) dropCard(target);
+        dragged.classList.remove('dragging');
+        dragged = null;
+    });
+
+    document.addEventListener('touchmove', e => {
+        if (!dragged || !touchClone) return;
+        const touch = e.touches[0];
+        touchClone.style.left = (touch.clientX - touchOffX) + 'px';
+        touchClone.style.top  = (touch.clientY - touchOffY) + 'px';
+        touchClone.style.display = 'none';
+        const el = document.elementFromPoint(touch.clientX, touch.clientY);
+        touchClone.style.display = '';
+        const target = el && el.closest('.song-card');
+        list.querySelectorAll('.song-card').forEach(c => c.classList.remove('drag-over'));
+        if (target && target !== dragged) target.classList.add('drag-over');
+        e.preventDefault();
+    }, { passive: false });
+
+    document.addEventListener('touchend', e => {
+        if (!dragged) return;
+        if (touchClone) { touchClone.remove(); touchClone = null; }
+        const touch = e.changedTouches[0];
+        const el = document.elementFromPoint(touch.clientX, touch.clientY);
+        const target = el && el.closest('.song-card');
+        list.querySelectorAll('.song-card').forEach(c => c.classList.remove('drag-over'));
+        if (target && target !== dragged) dropCard(target);
+        dragged.classList.remove('dragging');
+        dragged = null;
+    });
+
+    function dropCard(target) {
+        const ids = [...list.querySelectorAll('.song-card')].map(c => c.id.replace('card-', ''));
+        const fromIdx = songs.findIndex(s => s.id === dragged.id.replace('card-', ''));
+        const toIdx   = songs.findIndex(s => s.id === target.id.replace('card-', ''));
+        songs.splice(toIdx, 0, songs.splice(fromIdx, 1)[0]);
+        sortMode = 'custom';
+        document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+        render();
+        initDragDrop();
+    }
+}
+
+
+// ── CHECKBOX-ORDER SPELLISTA ─────────────────────────────
+let checkOrder = []; // [{songId, trackIdx}] i bockningsordning
+
+function onTrackCheck(songId, trackIdx, checked) {
+    // Ta bort om den finns
+    checkOrder = checkOrder.filter(e => !(e.songId === songId && e.trackIdx === trackIdx));
+    if (checked) checkOrder.push({ songId, trackIdx });
+    updateBadges();
+}
+
+function updateBadges() {
+    songs.forEach(s => {
+        const card = document.getElementById('card-' + s.id);
+        if (!card) return;
+        const count = checkOrder.filter(e => e.songId === s.id).length;
+        const badge = card.querySelector('.selection-badge');
+        if (badge) {
+            if (count > 0) { badge.style.display = 'inline-block'; badge.innerText = count + ' VALDA'; }
+            else { badge.style.display = 'none'; }
+        }
+        if (count > 0) card.classList.add('has-selection');
+        else card.classList.remove('has-selection');
+    });
+}
+
 function toggleSong(cardId) {
     document.getElementById(cardId).classList.toggle('expanded');
 }
@@ -313,9 +469,9 @@ function toggleSong(cardId) {
 function render() {
     let html = "";
     songs.forEach((s, sIdx) => {
-        html += `<div class="song-card" id="card-${s.id}">
+        html += `<div class="song-card" id="card-${s.id}" draggable="false">
             <div class="song-header" onclick="toggleSong('card-${s.id}')">
-                <div>
+                <div style="flex:1">
                     <div class="song-title">${s.title}</div>
                     <div class="song-artist">${s.artist}</div>
                 </div>
@@ -324,9 +480,9 @@ function render() {
             <div class="song-content">`;
         s.tracks.forEach((t, tIdx) => {
             html += `<div class="track-row">
-                <input type="checkbox" id="cb-${s.id}-${tIdx}">
+                <input type="checkbox" id="cb-${s.id}-${tIdx}" onchange="onTrackCheck('${s.id}', ${tIdx}, this.checked)">
                 <span class="track-label">${t.label}</span>
-                <button class="play-btn ${t.cls}" onclick="playSingle(${sIdx}, ${tIdx})">▶ SPELA</button>
+                <button class="play-btn ${t.cls}" onclick="playSingle('${s.id}', ${tIdx})">▶ SPELA</button>
             </div>`;
         });
         html += `</div></div>`;
@@ -334,6 +490,7 @@ function render() {
     document.getElementById('songList').innerHTML = html;
 }
 
+songs.sort((a, b) => a.title.localeCompare(b.title, 'sv'));
 render();
 </script>
 </body>
