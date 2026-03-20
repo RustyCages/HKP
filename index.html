@@ -33,11 +33,24 @@ audio { width: 100%; height: 44px; margin-bottom: 10px; }
 .nav-btn { background: #636363; color: #fff; border: none; padding: 12px; border-radius: 8px; flex: 1; font-weight: bold; font-size: 18px; }
 .nav-btn.primary { background: #FF5532; color: #191919; flex: 2; font-size: 14px; }
 .repeat-btn {
-    background: #636363; border: none; color: #ccc; padding: 12px;
-    border-radius: 8px; font-size: 16px; cursor: pointer; flex-shrink: 0; width: 46px;
+    background: #1e1e1e;
+    border: 1px solid #444;
+    color: #888;
+    padding: 10px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.15s;
+    white-space: nowrap;
 }
-.repeat-btn.active-one { background: #b01f1f; color: #fff; }
-.repeat-btn.active-all { background: #8a4d00; color: #fff; }
+.repeat-btn.active-one { background: #b01f1f; border-color: #e62e2e; color: #fff; }
+.repeat-btn.active-all { background: #8a4d00; border-color: #e6922e; color: #fff; }
 #help-section {
     background: #1a1a1a; border: 1px solid #333; border-radius: 12px;
     padding: 15px; margin-bottom: 15px; display: none; font-size: 14px; line-height: 1.6;
@@ -106,7 +119,7 @@ input[type="checkbox"] { width: 24px; height: 24px; accent-color: #FF5532; }
         <button class="nav-btn" onclick="prevTrack()">⏮</button>
         <button class="nav-btn primary" onclick="startPlaylist()">⚡ SPELA VALDA</button>
         <button class="nav-btn" onclick="nextTrack()">⏭</button>
-        <button class="repeat-btn" id="repeatBtn" onclick="cycleRepeat()" title="Repeat av">🔁</button>
+        <button class="repeat-btn" id="repeatBtn" onclick="cycleRepeat()" title="Repeat av">🔁 Av</button>
     </div>
 </div>
 
@@ -208,9 +221,18 @@ function cycleRepeat() {
     repeatMode = (repeatMode + 1) % 3;
     const btn = document.getElementById('repeatBtn');
     btn.classList.remove('active-one', 'active-all');
-    if (repeatMode === 1) { btn.classList.add('active-one'); btn.textContent = '🔂'; btn.title = 'Upprepa spår'; }
-    else if (repeatMode === 2) { btn.classList.add('active-all'); btn.textContent = '🔁'; btn.title = 'Upprepa lista'; }
-    else { btn.textContent = '🔁'; btn.title = 'Repeat av'; }
+    if (repeatMode === 1) {
+        btn.classList.add('active-one');
+        btn.innerHTML = '🔂 Spår';
+        btn.title = 'Upprepa spår';
+    } else if (repeatMode === 2) {
+        btn.classList.add('active-all');
+        btn.innerHTML = '🔁 Lista';
+        btn.title = 'Upprepa lista';
+    } else {
+        btn.innerHTML = '🔁 Av';
+        btn.title = 'Repeat av';
+    }
 }
 
 function toggleHelp() {
@@ -270,7 +292,7 @@ function render() {
             <div class="song-artist">${s.artist}</div>`;
         s.tracks.forEach((t, tIdx) => {
             html += `<div class="track-row">
-                <input type="checkbox" id="cb-${s.id}-${tIdx}" checked>
+                <input type="checkbox" id="cb-${s.id}-${tIdx}">
                 <span class="track-label">${t.label}</span>
                 <button class="play-btn ${t.cls}" onclick="playSingle(${sIdx}, ${tIdx})">▶ SPELA</button>
             </div>`;
