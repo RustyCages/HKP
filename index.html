@@ -36,21 +36,19 @@ audio { width: 100%; height: 44px; margin-bottom: 10px; }
     background: #1e1e1e;
     border: 1px solid #444;
     color: #888;
-    padding: 10px 14px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: bold;
-    letter-spacing: 0.5px;
+    padding: 8px 12px;
+    border-radius: 8px;
     cursor: pointer;
     flex-shrink: 0;
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 5px;
-    transition: all 0.15s;
-    white-space: nowrap;
+    justify-content: center;
+    transition: color 0.15s, border-color 0.15s;
+    min-width: 48px;
 }
-.repeat-btn.active-one { background: #b01f1f; border-color: #e62e2e; color: #fff; }
-.repeat-btn.active-all { background: #8a4d00; border-color: #e6922e; color: #fff; }
+.repeat-btn.active-one { color: #e62e2e; border-color: #e62e2e; background: #1e1e1e; }
+.repeat-btn.active-all { color: #ff8c00; border-color: #ff8c00; background: #1e1e1e; }
 #help-section {
     background: #1a1a1a; border: 1px solid #333; border-radius: 12px;
     padding: 15px; margin-bottom: 15px; display: none; font-size: 14px; line-height: 1.6;
@@ -119,7 +117,7 @@ input[type="checkbox"] { width: 24px; height: 24px; accent-color: #FF5532; }
         <button class="nav-btn" onclick="prevTrack()">⏮</button>
         <button class="nav-btn primary" onclick="startPlaylist()">⚡ SPELA VALDA</button>
         <button class="nav-btn" onclick="nextTrack()">⏭</button>
-        <button class="repeat-btn" id="repeatBtn" onclick="cycleRepeat()" title="Repeat av">🔁 Av</button>
+        <button class="repeat-btn" id="repeatBtn" onclick="cycleRepeat()" title="Repeat av"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></button>
     </div>
 </div>
 
@@ -223,17 +221,19 @@ function cycleRepeat() {
     btn.classList.remove('active-one', 'active-all');
     if (repeatMode === 1) {
         btn.classList.add('active-one');
-        btn.innerHTML = '🔂 Spår';
+        btn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg><span style="font-size:9px;font-weight:700;letter-spacing:0.5px;display:block;margin-top:1px;">SPÅR</span>`;
         btn.title = 'Upprepa spår';
     } else if (repeatMode === 2) {
         btn.classList.add('active-all');
-        btn.innerHTML = '🔁 Lista';
+        btn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg><span style="font-size:9px;font-weight:700;letter-spacing:0.5px;display:block;margin-top:1px;">ALLA</span>`;
         btn.title = 'Upprepa lista';
     } else {
-        btn.innerHTML = '🔁 Av';
+        btn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>`;
         btn.title = 'Repeat av';
     }
 }
+
+
 
 function toggleHelp() {
     const hs = document.getElementById('help-section');
