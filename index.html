@@ -3,132 +3,79 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-<meta name="robots" content="noindex, nofollow">
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <title>🎸 Hårdrockskören</title>
 <style>
+/* Bas-design */
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-body{background:#0a0a0a;color:#eee;font-family: sans-serif;padding:15px 12px 100px;}
+body{background:#191919;color:#F2F2F2;font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;padding:15px 12px 100px;}
 
-h1{font-size:24px; color:#e62e2e; text-align:center; margin-top:10px; text-transform:uppercase;}
-.sub{text-align:center; font-style:italic; font-size:12px; color:#888; margin-bottom:15px;}
+h1{font-size:22px;letter-spacing:1px;color:#FF5532;text-align:center;margin-top:10px;}
+.sub{text-align:center;font-style:italic;font-size:12px;color:#A0A0A0;margin-bottom:15px;}
 
-/* Hjälp-sektion */
-#help-section {
-    background: #1a1a1a; border: 1px solid #333; border-radius: 12px;
-    padding: 15px; margin-bottom: 15px; display: none; font-size: 14px; line-height: 1.5;
-}
-#help-section h3 { color: #e62e2e; margin-bottom: 8px; font-size: 16px; }
-.help-btn-toggle {
-    background: none; border: 1px solid #444; color: #A0A0A0; width: 100%;
-    padding: 8px; border-radius: 8px; font-size: 12px; margin-bottom: 15px; cursor: pointer;
-}
-
-#searchBar {
-    width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #333;
-    background: #1a1a1a; color: #fff; margin-bottom: 15px; font-size: 16px;
-}
-
+/* iPhone Unlock */
 #ios-init {
-    background: #e62e2e; color: #fff; width: 100%; padding: 18px;
+    background: #FF5532; color: #191919; width: 100%; padding: 18px;
     border-radius: 12px; font-weight: bold; border: none; margin-bottom: 15px;
-    display: block; font-size: 16px; cursor:pointer;
+    display: block; font-size: 16px; box-shadow: 0 4px 15px rgba(255,85,50,0.4);
 }
 
+/* Spelarkonsol */
 .player-sticky {
     position: -webkit-sticky; position: sticky; top: 10px; z-index: 100;
-    background: #191919; border: 1px solid #444; border-radius: 14px;
-    padding: 12px; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+    background: #000; border: 2px solid #FF5532; border-radius: 14px;
+    padding: 12px; margin-bottom: 20px; box-shadow: 0 8px 25px rgba(0,0,0,0.8);
 }
-.now-playing { font-size: 13px; font-weight: bold; color: #FF5532; text-align: center; margin-bottom: 10px; height: 1.2em; overflow: hidden; }
-
-/* Spelaren: Vita kontroller */
-audio { width: 100%; height: 40px; margin-bottom: 10px; background-color: #333; border-radius: 8px; }
-audio::-webkit-media-controls-panel { background-color: #333; }
-audio::-webkit-media-controls-play-button { filter: invert(1); }
-audio::-webkit-media-controls-mute-button { filter: invert(1); }
-audio::-webkit-media-controls-timeline { filter: invert(1) brightness(2); }
-audio::-webkit-media-controls-current-time-display { color: #ffffff; }
-audio::-webkit-media-controls-time-remaining-display { color: #ffffff; }
+.now-playing { font-size: 13px; font-weight: bold; color: #FF5532; text-align: center; margin-bottom: 10px; height: 1.2em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;}
+audio { width: 100%; height: 44px; margin-bottom: 10px; }
 
 .nav-controls { display: flex; gap: 8px; }
-.nav-btn { background: #636363; color: #fff; border: none; padding: 12px; border-radius: 8px; flex: 1; font-weight: bold; }
-.nav-btn.primary { background: #FF5532; flex: 2; }
+.nav-btn { background: #636363; color: #fff; border: none; padding: 12px; border-radius: 8px; flex: 1; font-weight: bold; font-size: 18px; }
+.nav-btn.primary { background: #FF5532; color: #191919; flex: 2; font-size: 14px; }
 
-.song-card { background:#1a1a1a; border:1px solid #333; border-radius:12px; margin-bottom:10px; overflow: hidden; }
-.song-header { display: flex; justify-content: space-between; align-items: center; padding: 15px; cursor: pointer; }
+/* Låtkort */
+.song-card { background:#262626; border:1px solid #444; border-radius:12px; padding:15px; margin-bottom:15px; }
 .song-title { font-size:17px; font-weight:bold; color:#fff; }
-.song-artist { font-size:12px; color:#A0A0A0; font-style: italic; }
+.song-artist { font-size:12px; color:#A0A0A0; margin-bottom:12px; font-style: italic; }
 
-.selection-badge { background: #FF5532; color: white; font-size: 10px; padding: 2px 6px; border-radius: 10px; margin-left: 8px; display: none; }
-.has-selection .selection-badge { display: inline-block; }
+.track-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.track-label { font-size: 11px; font-weight: bold; width: 75px; flex-shrink: 0; }
+.play-btn { flex-grow: 1; padding: 12px; border: none; border-radius: 8px; font-size: 12px; font-weight: bold; color: #fff; text-align: center; }
 
-.song-content { display: none; padding: 0 15px 15px 15px; border-top: 1px solid #222; }
-.song-card.expanded .song-content { display: block; }
+/* Färger */
+.c-bass { background: #4A90D9; }
+.c-tenor { background: #5BAD72; }
+.c-alto { background: #D4884A; }
+.c-soprano { background: #C45C8A; }
+.c-choir { background: #FF5532; color: #191919; }
+.c-backing { background: #636363; }
 
-.track-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; padding: 8px 0; border-bottom: 1px solid #222; }
-.track-label { font-size: 13px; width: 70px; flex-shrink: 0; color: #D9D9D9;}
-.play-btn { flex-grow: 1; padding: 12px; border: none; border-radius: 8px; font-size: 12px; font-weight: bold; color: #fff; }
-
-/* Stämmor färgteman */
-.c-bass { background: #2e5cb8; }
-.c-tenor { background: #28a745; }
-.c-alto { background: #d97706; }
-.c-soprano { background: #be185d; }
-.c-choir { background: #FF5532; }
-.c-backing { background: #4b5532; }
-
-input[type="checkbox"] { width: 28px; height: 28px; accent-color: #FF5532; }
-
-footer {
-    text-align: center; margin-top: 40px; padding: 20px;
-    border-top: 1px solid #222; color: #636363; font-size: 11px;
-}
-.warning { color: #444; margin-bottom: 10px; font-style: italic; }
+input[type="checkbox"] { width: 24px; height: 24px; accent-color: #FF5532; }
 </style>
 </head>
-<body oncontextmenu="return false;">
+<body>
 
-<h1>🎸 Hårdrockskören</h1>
-<p class="sub">Övningsportal</p>
+<h1>♬ HÅRDROCKSKÖREN</h1>
+<p class="sub">Streamingportal</p>
 
-<button class="help-btn-toggle" onclick="toggleHelp()">Visa instruktioner för iPhone/Android</button>
-
-<div id="help-section">
-    <h3>📱 Spara som App</h3>
-    <p>iPhone: Tryck på Dela-knappen -> "Lägg till på hemskärmen".<br>
-    Android: Tryck på tre punkterna -> "Lägg till på startskärmen".</p>
-    <button class="help-btn-toggle" onclick="toggleHelp()" style="margin-top:10px;">Stäng</button>
-</div>
-
-<button id="ios-init" onclick="initAudio()">STARTA SPELAREN</button>
+<button id="ios-init" onclick="initAudio()">1. AKTIVERA LJUD HÄR</button>
 
 <div class="player-sticky">
-    <div class="now-playing" id="trackTitle">Välj låtar nedan</div>
-    <audio id="audioPlayer" playsinline controls controlsList="nodownload"></audio>
+    <div class="now-playing" id="trackTitle">Välj låt nedan</div>
+    <audio id="audioPlayer" playsinline controls></audio>
     <div class="nav-controls">
         <button class="nav-btn" onclick="prevTrack()">⏮</button>
-        <button class="nav-btn primary" onclick="startPlaylist()">SPELA VALDA</button>
+        <button class="nav-btn primary" onclick="startPlaylist()">⚡ SPELA VALDA</button>
         <button class="nav-btn" onclick="nextTrack()">⏭</button>
     </div>
 </div>
 
-<input type="text" id="searchBar" placeholder="Sök låt..." onkeyup="render()">
-
 <div id="songList"></div>
-
-<footer>
-    <p class="warning">Allt material är upphovsrättsskyddat. Otillåten spridning loggas via nätverksprotokoll.</p>
-    <p>&copy; 2026 Skapad av Niklas Friberg</p>
-</footer>
 
 <script>
 const S3 = "https://hrk-media-prod-263167772559.s3.eu-north-1.amazonaws.com/materials";
 const audioPlayer = document.getElementById('audioPlayer');
 const trackTitle = document.getElementById('trackTitle');
-
-let playQueue = [];
-let currentIndex = 0;
 
 function initAudio() {
     audioPlayer.src = "https://actions.google.com/sounds/v1/alarms/beep_short.ogg";
@@ -136,87 +83,10 @@ function initAudio() {
         audioPlayer.pause();
         document.getElementById('ios-init').style.display = 'none';
         trackTitle.innerText = "Ljud redo!";
-    }).catch(e => console.log("Init misslyckades:", e));
-}
-
-function playTrack(idx) {
-    if (idx < 0 || idx >= playQueue.length) return;
-    
-    currentIndex = idx;
-    const t = playQueue[currentIndex];
-    trackTitle.innerText = `[${currentIndex + 1}/${playQueue.length}] ${t.name}`;
-    
-    // Vi använder absolut rå-URL för att inte förstöra "KO%CC%88R"-kodningen
-    audioPlayer.src = t.url;
-    
-    audioPlayer.load();
-    
-    const playPromise = audioPlayer.play();
-    if (playPromise !== undefined) {
-        playPromise.catch(error => {
-            console.log("Autoplay blockat eller filfel:", error);
-            trackTitle.innerText = "Tryck PLAY manuellt";
-        });
-    }
-}
-
-audioPlayer.addEventListener('ended', function() {
-    if (currentIndex < playQueue.length - 1) {
-        nextTrack();
-    } else {
-        trackTitle.innerText = "Spellistan klar!";
-    }
-});
-
-function nextTrack() { if (currentIndex < playQueue.length - 1) playTrack(currentIndex + 1); }
-function prevTrack() { if (currentIndex > 0) playTrack(currentIndex - 1); }
-
-function startPlaylist() {
-    playQueue = [];
-    songs.forEach(s => {
-        s.tracks.forEach((t, i) => {
-            const cb = document.getElementById(`cb-${s.id}-${i}`);
-            if (cb && cb.checked) {
-                playQueue.push({ url: t.url, name: `${s.title} (${t.label})` });
-            }
-        });
     });
-    if (playQueue.length > 0) playTrack(0);
-    else alert("Välj minst en stämma först!");
 }
 
-// FIXAD FUNKTION: Hittar nu rätt låt via ID istället för index
-function playSingle(e, songId, trackIdx) {
-    e.stopPropagation();
-    const song = songs.find(s => s.id === songId);
-    if (!song) return;
-    const track = song.tracks[trackIdx];
-    playQueue = [{ url: track.url, name: `${song.title} (${track.label})` }];
-    playTrack(0);
-}
-
-function toggleHelp() {
-    const hs = document.getElementById('help-section');
-    hs.style.display = hs.style.display === 'block' ? 'none' : 'block';
-}
-
-function toggleSong(cardId) {
-    const card = document.getElementById(cardId);
-    if (card) card.classList.toggle('expanded');
-}
-
-function updateBadge(songId) {
-    const card = document.getElementById(`card-${songId}`);
-    const checked = card.querySelectorAll('input[type="checkbox"]:checked').length;
-    if (checked > 0) {
-        card.classList.add('has-selection');
-        card.querySelector('.selection-badge').innerText = `${checked} VALDA`;
-    } else {
-        card.classList.remove('has-selection');
-    }
-}
-
-let songs = [
+const songs = [
   { title:"Ace of Spades", artist:"Motörhead", id:"ace", tracks:[
     {label:"Bas", cls:"c-bass", url:`${S3}/598c0d6a-bc95-4e2a-b2ee-098429b39a12-BAS.mp3`},
     {label:"Tenor", cls:"c-tenor", url:`${S3}/1de62d84-5f08-4deb-aa93-73e0ac38d1ef-TENOR.mp3`},
@@ -290,35 +160,63 @@ let songs = [
   ]}
 ];
 
-songs.sort((a, b) => a.title.localeCompare(b.title));
+let playQueue = [];
+let currentIndex = 0;
+
+function playTrack(idx) {
+    if (!playQueue[idx]) return;
+    currentIndex = idx;
+    const t = playQueue[currentIndex];
+    trackTitle.innerText = `[${currentIndex + 1}/${playQueue.length}] ${t.name}`;
+    audioPlayer.src = encodeURI(t.url).replace(/'/g, "%27");
+    audioPlayer.load();
+    audioPlayer.play().catch(err => console.log("Play blocked", err));
+}
+
+function startPlaylist() {
+    playQueue = [];
+    songs.forEach(s => {
+        s.tracks.forEach((t, i) => {
+            if (document.getElementById(`cb-${s.id}-${i}`).checked) {
+                playQueue.push({ url: t.url, name: `${s.title} (${t.label})` });
+            }
+        });
+    });
+    if (playQueue.length > 0) playTrack(0);
+}
+
+function playSingle(songIdx, trackIdx) {
+    const s = songs[songIdx];
+    const t = s.tracks[trackIdx];
+    playQueue = [{ url: t.url, name: `${s.title} (${t.label})` }];
+    playTrack(0);
+}
+
+function nextTrack() { if (currentIndex < playQueue.length - 1) playTrack(currentIndex + 1); }
+function prevTrack() { if (currentIndex > 0) playTrack(currentIndex - 1); }
+
+audioPlayer.onended = nextTrack;
 
 function render() {
-    const term = document.getElementById('searchBar').value.toLowerCase();
     let html = "";
-    songs.forEach((s) => {
-        if(!s.title.toLowerCase().includes(term) && !s.artist.toLowerCase().includes(term)) return;
-        html += `
-        <div class="song-card" id="card-${s.id}">
-            <div class="song-header" onclick="toggleSong('card-${s.id}')">
-                <div>
-                    <div class="song-title">${s.title} <span class="selection-badge"></span></div>
-                    <div class="song-artist">${s.artist}</div>
-                </div>
-            </div>
-            <div class="song-content">`;
+    songs.forEach((s, sIdx) => {
+        html += `<div class="song-card">
+            <div class="song-title">${s.title}</div>
+            <div class="song-artist">${s.artist}</div>`;
         s.tracks.forEach((t, tIdx) => {
-            html += `
-                <div class="track-row">
-                    <input type="checkbox" id="cb-${s.id}-${tIdx}" onchange="updateBadge('${s.id}')">
-                    <span class="track-label">${t.label}</span>
-                    <button class="play-btn ${t.cls}" onclick="playSingle(event, '${s.id}', ${tIdx})">LYSSNA</button>
-                </div>`;
+            html += `<div class="track-row">
+                <input type="checkbox" id="cb-${s.id}-${tIdx}" checked>
+                <span class="track-label">${t.label}</span>
+                <button class="play-btn ${t.cls}" onclick="playSingle(${sIdx}, ${tIdx})">▶ SPELA</button>
+            </div>`;
         });
-        html += `</div></div>`;
+        html += `</div>`;
     });
     document.getElementById('songList').innerHTML = html;
 }
+
 render();
 </script>
 </body>
 </html>
+
