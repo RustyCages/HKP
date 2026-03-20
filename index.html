@@ -245,14 +245,31 @@ function toggleHelp() {
     hs.style.display = hs.style.display === 'block' ? 'none' : 'block';
 }
 
-function playTrack(idx) {
+// Fetch via blob för att kringgå webbläsarens URL-normalisering (NFD → NFC)
+async function fetchAudioBlob(url) {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error('HTTP ' + response.status);
+    const blob = await response.blob();
+    return URL.createObjectURL(blob);
+}
+let currentBlobUrl = null;
+
+async function playTrack(idx) {
     if (!playQueue[idx]) return;
     currentIndex = idx;
     const t = playQueue[currentIndex];
-    trackTitle.innerText = `[${currentIndex + 1}/${playQueue.length}] ${t.name}`;
-    audioPlayer.src = encodeURI(t.url).replace(/'/g, "%27");
-    audioPlayer.load();
-    audioPlayer.play().catch(err => console.log("Play blocked", err));
+    try {
+        if (currentBlobUrl) { URL.revokeObjectURL(currentBlobUrl); currentBlobUrl = null; }
+        trackTitle.innerText = '⏳ ' + t.name;
+        currentBlobUrl = await fetchAudioBlob(t.url);
+        trackTitle.innerText = '[' + (currentIndex + 1) + '/' + playQueue.length + '] ' + t.name;
+        audioPlayer.src = currentBlobUrl;
+        audioPlayer.load();
+        audioPlayer.play().catch(err => { trackTitle.innerText = 'Tryck PLAY manuellt'; });
+    } catch(err) {
+        trackTitle.innerText = '❌ ' + t.name;
+        console.error(err);
+    }
 }
 
 function startPlaylist() {
