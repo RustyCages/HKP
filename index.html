@@ -32,6 +32,23 @@ audio { width: 100%; height: 44px; margin-bottom: 10px; }
 .nav-controls { display: flex; gap: 8px; }
 .nav-btn { background: #636363; color: #fff; border: none; padding: 12px; border-radius: 8px; flex: 1; font-weight: bold; font-size: 18px; }
 .nav-btn.primary { background: #FF5532; color: #191919; flex: 2; font-size: 14px; }
+.repeat-btn {
+    background: #636363; border: none; color: #ccc; padding: 12px;
+    border-radius: 8px; font-size: 16px; cursor: pointer; flex-shrink: 0; width: 46px;
+}
+.repeat-btn.active-one { background: #b01f1f; color: #fff; }
+.repeat-btn.active-all { background: #8a4d00; color: #fff; }
+#help-section {
+    background: #1a1a1a; border: 1px solid #333; border-radius: 12px;
+    padding: 15px; margin-bottom: 15px; display: none; font-size: 14px; line-height: 1.6;
+}
+#help-section h3 { color: #e62e2e; margin-bottom: 6px; font-size: 15px; margin-top: 12px; }
+#help-section h3:first-child { margin-top: 0; }
+#help-section p { color: #ccc; margin-bottom: 4px; }
+.help-btn-toggle {
+    background: none; border: 1px solid #444; color: #888; width: 100%;
+    padding: 8px; border-radius: 8px; font-size: 12px; margin-bottom: 12px; cursor: pointer;
+}
 
 /* Låtkort */
 .song-card { background:#262626; border:1px solid #444; border-radius:12px; padding:15px; margin-bottom:15px; }
@@ -58,6 +75,28 @@ input[type="checkbox"] { width: 24px; height: 24px; accent-color: #FF5532; }
 <h1>♬ HÅRDROCKSKÖREN</h1>
 <p class="sub">Streamingportal</p>
 
+<button class="help-btn-toggle" onclick="toggleHelp()">📖 Visa instruktioner</button>
+
+<div id="help-section">
+  <h3>🎸 Kom igång</h3>
+  <p>Tryck på <strong>1. AKTIVERA LJUD HÄR</strong> första gången du öppnar appen — det krävs för att ljud ska fungera på iPhone och Android.</p>
+
+  <h3>🎵 Välj stämmor &amp; spela lista</h3>
+  <p>Expandera en låt och bocka i en eller flera stämmor. Tryck sedan <strong>⚡ SPELA VALDA</strong> för att spela dem i följd. Vill du testa en stämma direkt — tryck på knappen med stämmans namn.</p>
+
+  <h3>🔁 Repeat</h3>
+  <p>Tryck på 🔁-knappen bredvid navigeringen för att växla repeat-läge:<br>
+  <strong>Grå</strong> = av — listan spelas en gång.<br>
+  <strong>🔂 Röd</strong> = upprepa spår — samma spår loopar.<br>
+  <strong>🔁 Orange</strong> = upprepa lista — börjar om från början.</p>
+
+  <h3>📱 Spara som app på mobilen</h3>
+  <p><strong>iPhone:</strong> Tryck på Dela-knappen i Safari → "Lägg till på hemskärmen".<br>
+  <strong>Android:</strong> Tryck på tre punkterna i Chrome → "Lägg till på startskärmen".</p>
+
+  <button class="help-btn-toggle" onclick="toggleHelp()" style="margin-top:10px;">Stäng</button>
+</div>
+
 <button id="ios-init" onclick="initAudio()">1. AKTIVERA LJUD HÄR</button>
 
 <div class="player-sticky">
@@ -67,6 +106,7 @@ input[type="checkbox"] { width: 24px; height: 24px; accent-color: #FF5532; }
         <button class="nav-btn" onclick="prevTrack()">⏮</button>
         <button class="nav-btn primary" onclick="startPlaylist()">⚡ SPELA VALDA</button>
         <button class="nav-btn" onclick="nextTrack()">⏭</button>
+        <button class="repeat-btn" id="repeatBtn" onclick="cycleRepeat()" title="Repeat av">🔁</button>
     </div>
 </div>
 
@@ -162,6 +202,21 @@ const songs = [
 
 let playQueue = [];
 let currentIndex = 0;
+let repeatMode = 0; // 0=off, 1=one, 2=all
+
+function cycleRepeat() {
+    repeatMode = (repeatMode + 1) % 3;
+    const btn = document.getElementById('repeatBtn');
+    btn.classList.remove('active-one', 'active-all');
+    if (repeatMode === 1) { btn.classList.add('active-one'); btn.textContent = '🔂'; btn.title = 'Upprepa spår'; }
+    else if (repeatMode === 2) { btn.classList.add('active-all'); btn.textContent = '🔁'; btn.title = 'Upprepa lista'; }
+    else { btn.textContent = '🔁'; btn.title = 'Repeat av'; }
+}
+
+function toggleHelp() {
+    const hs = document.getElementById('help-section');
+    hs.style.display = hs.style.display === 'block' ? 'none' : 'block';
+}
 
 function playTrack(idx) {
     if (!playQueue[idx]) return;
@@ -195,7 +250,17 @@ function playSingle(songIdx, trackIdx) {
 function nextTrack() { if (currentIndex < playQueue.length - 1) playTrack(currentIndex + 1); }
 function prevTrack() { if (currentIndex > 0) playTrack(currentIndex - 1); }
 
-audioPlayer.onended = nextTrack;
+audioPlayer.onended = function() {
+    if (repeatMode === 1) {
+        playTrack(currentIndex);
+    } else if (currentIndex < playQueue.length - 1) {
+        nextTrack();
+    } else if (repeatMode === 2) {
+        playTrack(0);
+    } else {
+        trackTitle.innerText = 'Spellistan klar!';
+    }
+};
 
 function render() {
     let html = "";
